@@ -9,22 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Log4j2
 @RequiredArgsConstructor
-@RequestMapping("/pauta")
 public class PautaController implements PautaAPI {
     private final PautaService pautaService;
 
     @Override
     public PautaCadastraResponse cadastraPauta(NovaPautaRequest novaPauta) {
-
         log.info("[start] PautaController - cadastraPauta");
-
         PautaCadastraResponse pautaCadastrada = pautaService.cadastraPauta(novaPauta);
-
         log.info("[finish] PautaController - cadastraPauta");
-
-
-
-
         return pautaCadastrada;
     }
 }
