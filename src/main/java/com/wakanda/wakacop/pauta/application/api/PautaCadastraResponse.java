@@ -1,5 +1,6 @@
 package com.wakanda.wakacop.pauta.application.api;
 
+import com.wakanda.wakacop.pauta.domain.Pauta;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -9,4 +10,8 @@ import java.util.UUID;
 @ToString
 public class PautaCadastraResponse {
     private UUID id;
+
+    public PautaCadastraResponse(Pauta pauta) {
+        this.id = pauta.getId();
+    }
 }
