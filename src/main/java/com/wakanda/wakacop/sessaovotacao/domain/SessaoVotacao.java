@@ -47,12 +47,33 @@ public class SessaoVotacao {
     }
 
     public VotoPauta recebeVoto(VotoRequest votoRequest){
+        validaSessaoAberta();
         validaAssociado(votoRequest.getCpfAssociado());
         VotoPauta voto = new VotoPauta(this, votoRequest);
         votos.put(votoRequest.getCpfAssociado(), voto);
         return voto;
 
     }
+
+    private void validaSessaoAberta() {
+        atualizaStatus();
+        if(this.status.equals(StatusSessaoVotacao.FECHADA)){
+            throw new RuntimeException("Sessão está fechada!");
+        }
+    }
+
+    private void atualizaStatus() {
+        if(this.status.equals(StatusSessaoVotacao.ABERTA)){
+            if(LocalDateTime.now().isAfter(dataEncerramento)){
+                fechaSessao();
+            }
+        }
+    }
+
+    private void fechaSessao() {
+        this.status = StatusSessaoVotacao.FECHADA;
+    }
+
 
     private void validaAssociado(String cpfAssociado) {
         if(this.votos.containsKey(cpfAssociado)){
