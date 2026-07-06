@@ -35,4 +35,8 @@ public class VotoPauta {
         this.momentoVoto = LocalDateTime.now();
         this.sessaoVotacao = sessaoVotacao;
     }
+
+    public UUID getIdSessao(){
+        return this.sessaoVotacao.getId();
+    }
 }
