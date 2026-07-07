@@ -1,6 +1,8 @@
 package com.wakanda.wakacop.sessaovotacao.domain;
 
+import com.wakanda.wakacop.associado.application.service.AssociadoService;
 import com.wakanda.wakacop.pauta.domain.Pauta;
+import com.wakanda.wakacop.sessaovotacao.application.api.ResultadoSessaoResponse;
 import com.wakanda.wakacop.sessaovotacao.application.api.SessaoAberturaRequest;
 import com.wakanda.wakacop.sessaovotacao.application.api.VotoRequest;
 import jakarta.persistence.*;
@@ -46,9 +48,9 @@ public class SessaoVotacao {
         this.votos = new HashMap<>();
     }
 
-    public VotoPauta recebeVoto(VotoRequest votoRequest){
+    public VotoPauta recebeVoto(VotoRequest votoRequest, AssociadoService associadoService){
         validaSessaoAberta();
-        validaAssociado(votoRequest.getCpfAssociado());
+        validaAssociado(votoRequest.getCpfAssociado(), associadoService);
         VotoPauta voto = new VotoPauta(this, votoRequest);
         votos.put(votoRequest.getCpfAssociado(), voto);
         return voto;
@@ -75,12 +77,37 @@ public class SessaoVotacao {
     }
 
 
-    private void validaAssociado(String cpfAssociado) {
-        if(this.votos.containsKey(cpfAssociado)){
-            new RuntimeException("Associado já votou nessa sessão!");
-        }
+    private void validaAssociado(String cpfAssociado, AssociadoService associadoService) {
+        associadoService.validaAssociadoAptoVoto(cpfAssociado);
+        validaVotoDuplicado(cpfAssociado);
 
     }
 
+    private void validaVotoDuplicado(String cpfAssociado) {
+        if(this.votos.containsKey(cpfAssociado)){
+            throw new RuntimeException("Associado já votou nessa sessão!");
+        }
+    }
 
+    public ResultadoSessaoResponse obtemResultado(){
+        atualizaStatus();
+        return new ResultadoSessaoResponse(this);
+    }
+
+
+    public Long getTotalVotos() {
+        return Long.valueOf(this.votos.size());
+    }
+
+    public Long getTotalSim() {
+        return calculaVotoPorOpcao(OpcaoVoto.SIM);
+    }
+
+    public Long getTotalNao() {
+        return calculaVotoPorOpcao(OpcaoVoto.NAO);
+    }
+
+    private Long calculaVotoPorOpcao(OpcaoVoto opcao) {
+        return votos.values().stream().filter(voto -> voto.opcaoIgual(opcao)).count();
+    }
 }
